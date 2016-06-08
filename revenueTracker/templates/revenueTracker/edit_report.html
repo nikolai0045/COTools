@@ -1,0 +1,138 @@
+{% extends 'revenueTracker/base.html' %}
+
+{% block scripts %}
+<script>
+	$(document).ready(function(){
+		modalConnect();
+	});
+	
+	$(document).ready(function(){
+		modalConnect();
+	});
+	
+	function modalConnect(){
+			$('.modalConnect').unbind('click');
+			$('.modalConnect').click(function(ev){
+				ev.preventDefault();
+				var url = this.href;
+				var modal = $(this).attr('modal');
+				$.get(url,function(data) {
+					var form = $('#ajax_form_modal_result',data);
+					$(modal).empty().append(form);
+					$(modal).modal({show:true});
+					$(document).ready(function() {
+						submitModalFormBind(url,modal);
+					});
+				}, 'html');
+				return false;
+			});
+	}
+	
+	function submitModalFormBind(url,modal){
+		$(modal + ',#ajax_form_modal_result').submit(function(ev) {
+			console.log('about to call ajax post');
+			$.ajax({
+					type:"POST",
+					url:url,
+					data: $(this).serialize(),
+					success: function(response,textStatus,jqXHR){
+						var form = $("#ajax_form_modal_result_div",response);
+						if (form.html()) {
+							console.log('form returned');
+							$('#ajax_form_modal_result_div').html(form);
+							$(modal).modal('show');
+						}
+						else{
+							console.log('table returned');
+							$('#paymentTable').empty().append(response);
+							$(modal).empty();
+							$(modal).modal('hide');
+						}
+					},
+					error: function(request,status,error) {
+						console.log(error);
+						var div = $('ajax_form_modal_result_div', request.responseText);
+						$(modal + ',#ajax_form_modal_result_div').html(div);
+							
+					}
+			});
+			return false;
+		});
+	}
+</script>
+{% endblock scripts %}
+{% block content %}
+<div id='cashPaymentModal' class='modal fade' role='dialog'></div>
+<div id='checkPaymentModal' class='modal fade' role='dialog'></div>
+
+<div class='container'>
+	<h2>Cover Sheet for {{report.student}} - {{report.date}}</h2>
+	<table class='table table-hover table-condensed'>
+		<thead>
+			<th>Salutation</th>
+			<th>First Name</th>
+			<th>Last Name/Company Name</th>
+			<th>Street Address</th>
+			<th>City</th>
+			<th>State</th>
+			<th>ZIP</th>
+			<th>Payment Type</th>
+			<th>Amount</th>
+			<th>Check Number</th>
+		</thead>
+		<tbody id='paymentTable' data-link='row' class='rowlink'>
+			{% for check in checks %}
+			<tr>
+				<td><a class='modalConnect' modal='#checkPaymentModal' href='/add_check_gift/{{report.pk}}/{{report.student.pk}}/{{check.pk}}/'>{{check.salutation}}</a></td>
+				<td>{{check.first_name}}</td>
+				<td>{{check.last_name}}</td>
+				<td>{{check.street_address}}</td>
+				<td>{{check.city}}</td>
+				<td>{{check.state}}</td>
+				<td>{{check.zip_code}}</td>
+				<td>Check</td>
+				<td>{{check.amount}}</td>
+				<td>{{check.check_number}}</td>
+			</tr>
+			{% endfor %}
+			{% for c in cash %}
+			<tr>
+				<td><a class='modalConnect' modal='#cashPaymentModal' href='/add_cash_gift/{{report.pk}}/{{report.student.pk}}/{{c.pk}}/'>{{c.salutation}}</a></td>
+				<td>{{c.first_name}}</td>
+				<td>{{c.last_name}}</td>
+				<td>{{c.street_address}}</td>
+				<td>{{c.city}}</td>
+				<td>{{c.state}}</td>
+				<td>{{c.zip_code}}</td>
+				<td>Cash</td>
+				<td>{{c.amount}}</td>
+				<td></td>
+			</tr>
+			{% endfor %}
+			{% if not cash and not checks %}
+				<tr>
+					<td>No payments to display yet</td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+			{% endif %}
+		</tbody>
+	</table>
+	<div class='container col-md-4 col-md-offset-8'>
+		<a class='modalConnect' modal='#cashPaymentModal' id='addCash' href='/add_cash_gift/{{report.pk}}/{{report.student.pk}}/'>Add a Cash Gift</a>
+		<a class='modalConnect' modal='#checkPaymentModal' id='addCheck' href='/add_check_gift/{{report.pk}}/{{report.student.pk}}/'>Add a Check Gift</a>
+		<div style='margin-top:5px'>
+			<form action='' method='GET'>
+				<input type='submit' class='btn btn-default' value='Submit Report'/>
+			</form>
+		</div>
+	</div>
+</div>
+{% endblock content %}

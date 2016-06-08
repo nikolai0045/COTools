@@ -1,0 +1,43 @@
+{% for check in checks %}
+<tr>
+	<td>{{check.salutation}}</td>
+	<td>{{check.first_name}}</td>
+	<td>{{check.last_name}}</td>
+	<td>{{check.street_address}}</td>
+	<td>{{check.city}}</td>
+	<td>{{check.state}}</td>
+	<td>{{check.zip_code}}</td>
+	<td>Check</td>
+	<td>{{check.amount}}</td>
+	<td>{{check.check_number}}</td>
+</tr>
+{% endfor %}
+{% for c in cash %}
+<tr>
+	<td>{{c.salutation}}</td>
+	<td>{{c.first_name}}</td>
+	<td>{{c.last_name}}</td>
+	<td>{{c.street_address}}</td>
+	<td>{{c.city}}</td>
+	<td>{{c.state}}</td>
+	<td>{{c.zip_code}}</td>
+	<td>Cash</td>
+	<td>{{c.amount}}</td>
+	<td></td>
+</tr>
+{% endfor %}
+{% if not cash and not checks %}
+	<tr>
+		<td>No payments to display yet</td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+{% endif %}
+
